@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p2519 - モックアップ</title>
+    <style>
+        /* --- 
+         * スタイリング定義
+         * --- */
+
+        /* 第一階層: カラーパレット */
+        :root {
+            --palette-333: #333333;
+            --palette-666: #666666; 
+            --palette-FFF: #FFFFFF;
+            --palette-translucent-0008: rgba(0, 0, 0, 0.8); 
+            --palette-translucent-2558: rgba(255, 255, 255, 0.8); 
+        }
+
+        /* 第二階層: 抽象的な定義 */
+        :root {
+            /* テーマカラー (Theme) */
+            --theme-main: var(--palette-FFF);
+            --theme-sub: var(--palette-333);
+            --theme-accent: var(--palette-666);
+
+            /* ベースカラー (Base) */
+            --base-primary: var(--palette-FFF);
+            --base-secondary: var(--palette-333);
+            --base-tertiary: var(--palette-666);
+            --base-quaternary: var(--palette-translucent-2558);
+            --base-quinary: var(--palette-translucent-0008);
+        }
+        
+        /* 第三階層: 具象的な定義 */
+        :root {
+            --color-text: var(--base-secondary);
+            --color-text-inverse: var(--base-primary);
+            --color-background: var(--base-primary);
+            --color-background-alt: var(--base-tertiary);
+            --color-background-overlay: var(--base-quaternary);
+            --color-text-shadow: var(--base-quinary);
+            --color-interactive-hover-bg: var(--color-background-overlay); 
+            
+            /* フォントスケール定義 */
+            --font-scale-base: 1em;
+            --font-scale-ratio: 1.25;
+            --font-size-sm: calc(var(--font-scale-base) / var(--font-scale-ratio));
+            --font-size-md: calc(var(--font-scale-base));
+            --font-size-lg: calc(var(--font-size-md) * var(--font-scale-ratio) * var(--font-scale-ratio));
+            --font-size-xl: calc(var(--font-size-lg) * var(--font-scale-ratio) * var(--font-scale-ratio) * var(--font-scale-ratio) * var(--font-scale-ratio));
+
+            --header-height: 4em; 
+        }
+
+        /* --- 基本スタイルリセットと設定 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { overflow-x: hidden; }
+        
+        body { 
+            font-family: "Yu Mincho", YuMincho, "Hiragino Mincho ProN W3", "ヒラギノ明朝 ProN W3", "Hiragino Mincho ProN", "HG明朝E", "ＭＳ Ｐ明朝", "MS PMincho", serif; 
+            background-color: var(--color-background); 
+            color: var(--color-text); 
+            line-height: 1.6; 
+            font-size: var(--font-size-md);
+            /* 文字詰め */
+            font-feature-settings: 'palt';
+            -webkit-font-feature-settings: 'palt';
+        }
+        
+        h1, h2, h3 { margin-bottom: 1em; font-weight: 600; line-height: 1.3; }
+        h1 { font-size: var(--font-size-xl); }
+        h2 { font-size: var(--font-size-lg); }
+        h3 { font-size: var(--font-size-md); }
+        p { margin-bottom: 1em; }
+        a { color: var(--color-text); text-decoration: none; cursor: pointer; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* --- レイアウトコンポーネント --- */
+        .container { margin: 0 auto; padding-left: 1em; padding-right: 1em; }
+        
+        header { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            background-color: transparent; 
+            z-index: 10; 
+            color: var(--color-text); 
+            text-shadow: 0 0 0.25em var(--base-quaternary); 
+        }
+        
+        header .container { height: var(--header-height); padding-top: 0; padding-bottom: 0; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: var(--font-size-md); margin-bottom: 0; }
+        header a { color: inherit; }
+        main { padding-top: 4em; padding-bottom: 4em; background-color: var(--color-background-overlay); z-index: 5; position: relative; }
+        
+        footer { font-size: var(--font-size-sm); padding: 3em 1em; background-color: var(--color-background-overlay); z-index: 5; position: relative; }
+        
+        .footer-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 1em 2em; margin-bottom: 3em; }
+        .footer-column { min-width: 10em; padding: 0 1em; text-align: center; }
+        .footer-column h4 { font-size: var(--font-size-lg); margin-bottom: 1em; }
+        .footer-column ul { list-style: none; padding: 0; margin: 0; }
+        .footer-column li { margin-bottom: 0.5em; }
+        .footer-column a { color: var(--color-text); text-decoration: none; font-size: var(--font-size-md); }
+        .footer-column a:hover { text-decoration: none; }
+        nav#breadcrumbs { font-size: var(--font-size-sm); }
+        nav#breadcrumbs a { margin: 0 0.25em; }
+        nav#breadcrumbs a:hover { text-decoration: none; }
+        nav#breadcrumbs span { margin: 0 0.25em; color: inherit; }
+        .copyright { text-align: center; font-size: var(--font-size-sm); margin: 0; }
+        
+        .page-section { padding-top: 2em; padding-bottom: 2em; margin-bottom: 4em; }
+        .page-section:last-child { margin-bottom: 0; }
+        .page-section h2 { text-align: center; font-size: var(--font-size-lg); margin-bottom: 2.5em; }
+
+        #artworks-list-page .page-section h1 {
+            text-align: center; 
+            font-size: var(--font-size-lg); 
+            margin-bottom: 2.5em;
+        }
+
+        /* --- KVレイアウト --- */
+        .fixed-kv-background { position: fixed; top: 0; left: 0; height: 100vh; width: 100%; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -1; }
+        .kv-content-spacer { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 1em; color: var(--color-text-inverse); text-shadow: 0 0 0.25em var(--color-text-shadow); position: relative; z-index: 2; }
+        .kv-content-spacer h1 { font-size: var(--font-size-xl); margin-bottom: 0.5em; }
+        .kv-content-spacer h2 { font-size: var(--font-size-xl); margin-bottom: 0.5em; }
+        .kv-content-spacer p { font-size: var(--font-size-md); margin-bottom: 0; }
+
+        /* --- グリッド --- */
+        .grid-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(12.5em, 15em)); gap: 0; justify-content: center; background-color: transparent; padding: 0; }
+        .grid-item { background-color: transparent; transition: background-color 0.3s ease; }
+        .grid-item:hover { background-color: var(--color-interactive-hover-bg); }
+        .grid-item a { display: block; padding: 1em; }
+        .grid-item a:hover { background-color: transparent; }
+        .placeholder-img { width: 100%; aspect-ratio: 1 / 1; background-color: var(--color-background-alt); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-sm); margin-bottom: 0.5em; color: var(--palette-FFF); }
+        img.grid-item-image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background-color: var(--color-background-alt); margin-bottom: 0.5em; }
+        .grid-item h3 { font-size: var(--font-size-md); margin-bottom: 0.25em; text-align: center; }
+        
+        /* ページ制御 */
+        .page-content { opacity: 0; visibility: hidden; height: 0; overflow: hidden; transition: opacity 0.3s ease-in-out; }
+        .page-content.active { opacity: 1; visibility: visible; height: auto; overflow: visible; }
+        
+        /* サンプルグリッド */
+        .sample-grid-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(10em, 10em)); gap: 0; justify-content: center; background-color: transparent; padding: 0; }
+        .sample-grid-item { background-color: transparent; padding: 0; cursor: zoom-in; }
+        .sample-grid-item:hover { opacity: 0.8; }
+        .sample-grid-item img,
+        .sample-grid-item .placeholder-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; margin-bottom: 0; }
+        
+        /* 共通テーブルスタイル */
+        .info-table { width: auto; margin: 0 auto; background-color: transparent; border-collapse: separate; border-spacing: 0; padding: 0; font-size: var(--font-size-sm); }
+        .info-table th, 
+        .info-table td { border: none; padding: 0.5em; vertical-align: top; transition: none; }
+        .info-table th,
+        #news-section .info-table td:first-child { white-space: nowrap; font-weight: 600; padding-right: 1.5em; text-align: right; }
+        .info-table td { text-align: left; }
+        #news-section .info-table td:last-child { padding-left: 0; text-align: left; }
+        .info-table td a { text-decoration: none; }
+        .info-table td a:hover { text-decoration: none; }
+
+        /* ライトボックス */
+        .lightbox-overlay { opacity: 0; visibility: hidden; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 100; cursor: zoom-out; padding: 2em; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s ease-in-out, visibility 0s 0.3s; }
+        .lightbox-overlay.active { opacity: 1; visibility: visible; transition: opacity 0.3s ease-in-out; }
+        .lightbox-overlay img { max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.2s ease-in-out; }
+        .lightbox-close,
+        .lightbox-nav { position: absolute; color: var(--color-text-inverse); font-size: var(--font-size-xl); font-weight: bold; text-shadow: 0 0 0.25em var(--color-text-shadow); cursor: pointer; user-select: none; transition: opacity 0.2s ease; }
+        .lightbox-close:hover,
+        .lightbox-nav:hover { opacity: 0.7; }
+        .lightbox-close { top: 1em; right: 2em; font-size: var(--font-size-xl); }
+        .lightbox-nav { top: 50%; transform: translateY(-50%); }
+        #lightbox-prev { left: 2em; }
+        #lightbox-next { right: 2em; }
+        .lightbox-nav.hidden { display: none; }
+        
+        /* --- ログイン画面専用スタイル (削除) --- */
+        
+    </style>
+</head>
+<body>
+    
+    <header>
+        <div class="container">
+            <h1><a href="#" class="nav-link" data-target="home">p2519</a></h1>
+            <nav id="breadcrumbs">
+                </nav>
+        </div>
+    </header>
+
+    <div id="page-container">
+
+        <div id="home-page" class="page-content active">
+            
+            <div class="fixed-kv-background" style="background-image: url('images/keyvisual.png');">
+            </div>
+            
+            <section class="kv-content-spacer">
+                <h2>世界観を表現するキービジュアル</h2>
+                <p>この世界のキャッチコピーや導入文が入ります。</p>
+            </section>
+
+            <main>
+                <div class="container">
+                    <section id="artworks-list-section" class="page-section">
+                        <h2>
+                            <a href="#" class="nav-link" data-target="artworks-list">作品</a>
+                        </h2>
+                        <div class="grid-list">
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="matsurika">
+                                    <img src="images/artworks/matsurika/matsurika_001.jpg" alt="作品タイトル 1" class="grid-item-image">
+                                    <h3>作品タイトル 1</h3>
+                                </a>
+                            </div>
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork07">
+                                    <div class="placeholder-img">[ 作品画像 7 ]</div>
+                                    <h3>作品タイトル 7</h3>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="models-list-section" class="page-section">
+                        <h2>モデル</h2>
+                        <div class="grid-list">
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="model-detail" data-id="model01">
+                                    <img src="images/models/model01/model001.jpg" alt="モデル名 1" class="grid-item-image">
+                                    <h3>モデル名 1</h3>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="news-section" class="page-section">
+                        <h2>新着情報</h2>
+                        <table class="info-table">
+                            <tbody>
+                                <tr>
+                                    <td>2025.01.26</td>
+                                    <td>サイトを公開しました。</td>
+                                </tr>
+                                <tr>
+                                    <td>2025.01.20</td>
+                                    <td>作品「作品タイトル 7」を追加しました。</td>
+                                </tr>
+                                <tr>
+                                    <td>2025.01.15</td>
+                                    <td>モデル「モデル名 1」の情報を更新しました。長いお知らせの場合、このようにテキストが折り返されます。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+            </main> 
+        </div> 
+
+        <div id="artworks-list-page" class="page-content">
+            <div class="fixed-kv-background" style="background-image: url('images/keyvisual.jpg');">
+            </div>
+            <main>
+                <div class="container">
+                    <section id="artworks-list-section-all" class="page-section">
+                        <h1>作品一覧</h1>
+                        <div class="grid-list">
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="matsurika">
+                                    <img src="images/artworks/matsurika/matsurika_001.jpg" alt="作品タイトル 1" class="grid-item-image">
+                                    <h3>作品タイトル 1</h3>
+                                </a>
+                            </div>
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork02">
+                                    <img src="images/artworks/artwork02/artwork001.jpg" alt="作品タイトル 2" class="grid-item-image">
+                                    <h3>作品タイトル 2</h3>
+                                </a>
+                            </div>
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork03">
+                                    <img src="images/artworks/artwork03/artwork001.jpg" alt="作品タイトル 3" class="grid-item-image">
+                                    <h3>作品タイトル 3</h3>
+                                </a>
+                            </div>
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork04">
+                                    <div class="placeholder-img">[ 作品画像 4 ]</div>
+                                    <h3>作品タイトル 4</h3>
+                                </a>
+                            </div>
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork05">
+                                    <div class="placeholder-img">[ 作品画像 5 ]</div>
+                                    <h3>作品タイトル 5</h3>
+                                </a>
+                            </div>
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork06">
+                                    <div class="placeholder-img">[ 作品画像 6 ]</div>
+                                    <h3>作品タイトル 6</h3>
+                                </a>
+                            </div>
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork07">
+                                    <div class="placeholder-img">[ 作品画像 7 ]</div>
+                                    <h3>作品タイトル 7</h3>
+                                </a>
+                            </div>
+                            <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork08">
+                                    <div class="placeholder-img">[ 作品画像 8 ]</div>
+                                    <h3>作品タイトル 8</h3>
+                                </a>
+                            </div>
+                             <div class="grid-item">
+                                <a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork09">
+                                    <div class="placeholder-img">[ 作品画像 9 ]</div>
+                                    <h3>作品タイトル 9</h3>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main> 
+        </div>
+        
+        <div id="artwork-detail-page" class="page-content">
+            <div id="artwork-kv-section" class="fixed-kv-background"></div>
+            <section class="kv-content-spacer">
+                <h1 id="artwork-title"></h1>
+            </section>
+            <main>
+                <div class="container">
+                    <section id="sample-section" class="page-section">
+                        <h2>サンプル</h2>
+                        <div class="sample-grid-list" id="sample-grid-container">
+                            </div>
+                    </section>
+                    <section id="spec-section-artwork" class="page-section">
+                        <h2>仕様</h2>
+                        <table class="info-table">
+                            <tbody id="artwork-spec-body">
+                                <tr>
+                                    <th>作品番号</th>
+                                    <td id="artwork-spec-id"></td>
+                                </tr>
+                                <tr>
+                                    <th>作品名称</th>
+                                    <td id="artwork-spec-name"></td>
+                                </tr>
+                                <tr>
+                                    <th>制作時期</th>
+                                    <td id="artwork-spec-date"></td>
+                                </tr>
+                                <tr>
+                                    <th>使用モデル</th>
+                                    <td id="artwork-spec-models"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <div id="model-detail-page" class="page-content">
+            <div id="model-kv-section" class="fixed-kv-background"></div>
+            <section class="kv-content-spacer">
+                <h1 id="model-name"></h1>
+            </section>
+            <main>
+                <div class="container">
+                    <section id="spec-section-model" class="page-section">
+                        <h2>仕様</h2>
+                        <table class="info-table">
+                            <tbody id="model-spec-body">
+                                <tr>
+                                    <th>モデル番号</th>
+                                    <td id="model-spec-id"></td>
+                                </tr>
+                                <tr>
+                                    <th>氏名</th>
+                                    <td id="model-spec-name"></td>
+                                </tr>
+                                <tr>
+                                    <th>ふりがな</th>
+                                    <td id="model-spec-kana"></td>
+                                </tr>
+                                <tr>
+                                    <th>身長</th>
+                                    <td id="model-spec-height"></td>
+                                </tr>
+                                <tr>
+                                    <th>頭身</th>
+                                    <td id="model-spec-ratio"></td>
+                                </tr>
+                                <tr>
+                                    <th>使用作品</th>
+                                    <td id="model-spec-artworks"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+            </main>
+        </div>
+        
+        </div> 
+    
+    <footer>
+        <div class="container">
+            
+            <div class="footer-nav">
+                
+                <div class="footer-column">
+                    <h4><a href="#" class="nav-link" data-target="home">p2519</a></h4>
+                </div>
+
+                <div class="footer-column">
+                    <h4>
+                        <a href="#" class="nav-link" data-target="artworks-list">作品</a>
+                    </h4>
+                    <ul>
+                        <li><a href="#" class="nav-link" data-target="artwork-detail" data-id="matsurika">作品タイトル 1</a></li>
+                        <li><a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork02">作品タイトル 2</a></li>
+                        <li><a href="#" class="nav-link" data-target="artwork-detail" data-id="artwork03">作品タイトル 3</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>モデル</h4>
+                    <ul>
+                        <li><a href="#" class="nav-link" data-target="model-detail" data-id="model01">モデル名 1</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>その他</h4>
+                    <ul>
+                        <li><a href="admin.html">管理画面</a></li> 
+                    </ul>
+                </div>
+
+            </div>
+
+            <p class="copyright">&copy; 2025 p2519</p>
+
+        </div>
+    </footer>
+
+    <div id="lightbox-overlay" class="lightbox-overlay">
+        <span id="lightbox-close" class="lightbox-close">&times;</span>
+        <span id="lightbox-prev" class="lightbox-nav hidden">&lt;</span>
+        <img src="" alt="拡大画像" id="lightbox-image">
+        <span id="lightbox-next" class="lightbox-nav hidden">&gt;</span>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const pages = document.querySelectorAll('.page-content');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            // --- モックアップ用の簡易データ ---
+            const mockData = {
+                matsurika: { 
+                    id: "matsurika",
+                    title: "作品タイトル 1", 
+                    date: "2024年",
+                    models: [ { id: "model01", name: "モデル名 1" } ],
+                    kvImage: "images/artworks/matsurika/matsurika_001.jpg", 
+                    gallery: Array.from({ length: 54 }, (_, i) => {
+                        const num = String(i + 1).padStart(3, '0');
+                        return {
+                            src: `images/artworks/matsurika/matsurika_${num}.jpg`,
+                            alt: `サンプル ${i + 1}`
+                        };
+                    })
+                },
+                artwork02: { id: "artwork02", title: "作品タイトル 2", date: "2025年", models: [], kvImage: "images/artworks/artwork02/artwork001.jpg", gallery: [] },
+                artwork03: { id: "artwork03", title: "作品タイトル 3", date: "2025年", models: [{ id: "model01", name: "モデル名 1" }], kvImage: "images/artworks/artwork03/artwork001.jpg", gallery: [] },
+                model01: { 
+                    id: "model01",
+                    title: "モデル名 1", 
+                    kana: "もでるめい 1",
+                    height: "170cm",
+                    ratio: "8頭身",
+                    artworks: [ 
+                        { id: "matsurika", name: "作品タイトル 1" },
+                        { id: "artwork03", name: "作品タイトル 3" }
+                    ],
+                    kvImage: "images/models/model01/model001.jpg",
+                    gallery: []
+                }
+            };
+            
+            // --- DOM要素のキャッシュ ---
+            const artworkKv = document.getElementById('artwork-kv-section');
+            const artworkTitle = document.getElementById('artwork-title');
+            const artworkSpecId = document.getElementById('artwork-spec-id');
+            const artworkSpecName = document.getElementById('artwork-spec-name');
+            const artworkSpecDate = document.getElementById('artwork-spec-date');
+            const artworkSpecModels = document.getElementById('artwork-spec-models');
+            
+            const modelKv = document.getElementById('model-kv-section');
+            const modelName = document.getElementById('model-name');
+            const modelSpecId = document.getElementById('model-spec-id');
+            const modelSpecName = document.getElementById('model-spec-name');
+            const modelSpecKana = document.getElementById('model-spec-kana');
+            const modelSpecHeight = document.getElementById('model-spec-height');
+            const modelSpecRatio = document.getElementById('model-spec-ratio');
+            const modelSpecArtworks = document.getElementById('model-spec-artworks');
+            
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            
+            const lightbox = document.getElementById('lightbox-overlay');
+            const lightboxImg = document.getElementById('lightbox-image');
+            const lightboxPrev = document.getElementById('lightbox-prev');
+            const lightboxNext = document.getElementById('lightbox-next');
+            const lightboxClose = document.getElementById('lightbox-close');
+
+            const sampleContainer = document.getElementById('sample-grid-container');
+            const sampleSection = document.getElementById('sample-section');
+
+            let currentGallerySources = []; 
+            let currentIndex = 0;
+
+
+            // パンくずリストを更新する関数
+            function updateBreadcrumbs(targetId, dataId) {
+                if (targetId === 'home' || !targetId) { // ★ login を削除
+                    breadcrumbs.innerHTML = ''; 
+                    return; 
+                }
+                const homeLink = '<a href="#" class="nav-link" data-target="home">ホーム</a>';
+                
+                if (targetId === 'artworks-list') {
+                    breadcrumbs.innerHTML = `${homeLink}<span>&gt;</span><span>作品一覧</span>`;
+                } else if (targetId === 'artwork-detail' && dataId && mockData[dataId]) {
+                    breadcrumbs.innerHTML = `${homeLink}<span>&gt;</span><a href="#" class="nav-link" data-target="artworks-list">作品一覧</a><span>&gt;</span><span>${mockData[dataId].title}</span>`;
+                } else if (targetId === 'model-detail' && dataId && mockData[dataId]) {
+                    breadcrumbs.innerHTML = `${homeLink}<span>&gt;</span><span>${mockData[dataId].title}</span>`;
+                }
+                 else {
+                    breadcrumbs.innerHTML = ''; 
+                }
+                attachNavListeners(breadcrumbs);
+            }
+
+            // ページ表示を切り替える関数
+            function showPage(targetId, dataId) { 
+                pages.forEach(page => { page.classList.remove('active'); });
+                
+                const targetPageId = targetId || 'home';
+                const targetPage = document.getElementById(targetPageId + '-page');
+                
+                // ★ login-active の処理を削除
+                document.body.classList.remove('login-active');
+                
+                if (targetPage) { 
+                    targetPage.classList.add('active'); 
+                } 
+                else { 
+                    document.getElementById('home-page').classList.add('active'); 
+                }
+                window.scrollTo(0, 0);
+            }
+
+            // ナビゲーションクリック処理を関数化
+            function handleNavClick(e) {
+                e.preventDefault(); 
+                const targetId = e.currentTarget.dataset.target;
+                const dataId = e.currentTarget.dataset.id; 
+
+                showPage(targetId, dataId); 
+                updateBreadcrumbs(targetId, dataId);
+
+                // --- データ差し替え ---
+                if (targetId === 'artwork-detail' && dataId) {
+                    const data = mockData[dataId];
+                    if (data) {
+                        artworkTitle.textContent = data.title;
+                        artworkKv.style.backgroundImage = `url('${data.kvImage}')`;
+                        artworkSpecId.textContent = data.id;
+                        artworkSpecName.textContent = data.title;
+                        artworkSpecDate.textContent = data.date;
+                        artworkSpecModels.innerHTML = (data.models || []).map(model => 
+                            `<a href="#" class="nav-link" data-target="model-detail" data-id="${model.id}">${model.name}</a>`
+                        ).join(', ');
+                        attachNavListeners(artworkSpecModels);
+
+                        // ギャラリー生成
+                        if (sampleContainer && sampleSection) {
+                            if (data.gallery && data.gallery.length > 0) {
+                                sampleContainer.innerHTML = data.gallery.map(img => `
+                                    <div class="sample-grid-item">
+                                        <img src="${img.src}" alt="${img.alt}" class="sample-image">
+                                    </div>
+                                `).join('');
+                                sampleSection.style.display = 'block'; 
+                            } else {
+                                sampleContainer.innerHTML = ''; 
+                                sampleSection.style.display = 'none'; 
+                            }
+                        }
+
+                    }
+                } 
+                else if (targetId === 'model-detail' && dataId) {
+                    const data = mockData[dataId];
+                     if (data) {
+                        modelName.textContent = data.title;
+                        modelKv.style.backgroundImage = `url('${data.kvImage}')`;
+                        modelSpecId.textContent = data.id;
+                        modelSpecName.textContent = data.title;
+                        modelSpecKana.textContent = data.kana;
+                        modelSpecHeight.textContent = data.height;
+                        modelSpecRatio.textContent = data.ratio;
+                        modelSpecArtworks.innerHTML = (data.artworks || []).map(artwork => 
+                            `<a href="#" class="nav-link" data-target="artwork-detail" data-id="${artwork.id}">${artwork.name}</a>`
+                        ).join(', ');
+                        attachNavListeners(modelSpecArtworks);
+                        
+                        if (sampleSection) sampleSection.style.display = 'none';
+                        if (sampleContainer) sampleContainer.innerHTML = '';
+                    }
+                }
+                else if (targetId === 'home' || targetId === 'artworks-list') { // ★ login を削除
+                     if (sampleSection) sampleSection.style.display = 'none';
+                     if (sampleContainer) sampleContainer.innerHTML = '';
+                }
+            }
+            
+            // イベントリスナーを設定する関数
+            function attachNavListeners(scope) {
+                const linksToAttach = (scope || document).querySelectorAll('.nav-link');
+                linksToAttach.forEach(link => {
+                    link.removeEventListener('click', handleNavClick); 
+                    link.addEventListener('click', handleNavClick);
+                });
+            }
+
+            // 初期ロード時にすべての .nav-link にリスナーを設定
+            attachNavListeners(document);
+            showPage('home', null); 
+
+
+            // --- ライトボックス機能 ---
+            
+            function updateLightboxNav() {
+                if (!lightbox) return;
+                if (currentGallerySources.length <= 1) {
+                    lightboxPrev.classList.add('hidden');
+                    lightboxNext.classList.add('hidden');
+                    return;
+                }
+                lightboxPrev.classList.toggle('hidden', currentIndex === 0);
+                lightboxNext.classList.toggle('hidden', currentIndex === currentGallerySources.length - 1);
+            }
+
+            function displayImage(index) {
+                if (index >= 0 && index < currentGallerySources.length) {
+                    lightboxImg.style.opacity = '0'; 
+                    setTimeout(() => { 
+                        lightboxImg.src = currentGallerySources[index];
+                        lightboxImg.style.opacity = '1'; 
+                    }, 200); 
+                    currentIndex = index;
+                    updateLightboxNav();
+                }
+            }
+
+            function openLightbox(clickedSrc) {
+                if (!lightbox || !lightboxImg) return;
+                
+                const activePageId = document.querySelector('.page-content.active').id;
+                const activeSampleImages = document.querySelectorAll(`#${activePageId} .sample-image[src]`);
+                currentGallerySources = Array.from(activeSampleImages).map(img => img.src);
+
+                const initialIndex = currentGallerySources.indexOf(clickedSrc);
+                
+                if (initialIndex === -1) { 
+                    return; 
+                }
+                
+                lightbox.classList.add('active');
+                displayImage(initialIndex); 
+            }
+
+            function closeLightbox() {
+                if (!lightbox) return;
+                lightbox.classList.remove('active');
+            }
+
+            function showPrevImage() {
+                if (currentIndex > 0) {
+                    displayImage(currentIndex - 1);
+                }
+            }
+
+            function showNextImage() {
+                if (currentIndex < currentGallerySources.length - 1) {
+                    displayImage(currentIndex + 1);
+                }
+            }
+            
+            document.body.addEventListener('click', function(e) {
+                if (e.target.classList.contains('sample-image') && e.target.src) {
+                    openLightbox(e.target.src);
+                }
+            });
+
+            if(lightbox) {
+                lightbox.addEventListener('click', closeLightbox); 
+                lightboxClose.addEventListener('click', (e) => { e.stopPropagation(); closeLightbox(); });
+                lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); showPrevImage(); });
+                lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); showNextImage(); });
+                lightboxImg.addEventListener('click', (e) => { e.stopPropagation(); }); 
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('active')) {
+                    if (e.key === 'ArrowLeft') {
+                        showPrevImage();
+                    } else if (e.key === 'ArrowRight') {
+                        showNextImage();
+                    } else if (e.key === 'Escape') {
+                        closeLightbox();
+                    }
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>

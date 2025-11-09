@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p2519 - 管理画面</title>
+    <style>
+        /* --- 
+         * スタイリング定義 (★ 厳格な3階層カラー定義)
+         * --- */
+
+        /* 第一階層: カラーパレット */
+        :root {
+            --palette-333: #333333;
+            --palette-666: #666666; 
+            --palette-BBB: #BBBBBB;            
+            --palette-CCC: #CCCCCC;
+            --palette-EEE: #EEEEEE;
+            --palette-FFF: #FFFFFF;
+            
+            --palette-translucent-0002: rgba(0, 0, 0, 0.2); 
+            --palette-translucent-0008: rgba(0, 0, 0, 0.8); 
+            --palette-translucent-2558: rgba(255, 255, 255, 0.8);
+            
+            --palette-306: #330066; /* 藍色 */
+            --palette-800: #800000; /* えんじ色 */
+            --palette-960: #996600; /* 黄土色 */
+        }
+
+        /* 第二階層: 抽象的な定義 (セマンティックカラー) */
+        :root {
+            /* サイト共通のテーマ */
+            --theme-main: var(--palette-FFF);
+            --theme-sub: var(--palette-333);
+            --theme-accent: var(--palette-666);
+
+            /* 抽象ベースカラー */
+            --base-primary: var(--palette-FFF);
+            --base-secondary: var(--palette-333);
+            --base-tertiary: var(--palette-666);
+            --base-quaternary: var(--palette-translucent-2558);
+            --base-quinary: var(--palette-translucent-0008);
+            
+            /* 管理画面用のセマンティック(意味的)カラー */
+            --base-admin-bg: var(--palette-EEE);
+            --base-admin-sidebar-bg: var(--palette-333);
+            --base-admin-header-bg: var(--palette-FFF);
+            --base-admin-content-bg: var(--palette-FFF);
+            --base-admin-border: var(--palette-BBB);
+            --base-admin-input-bg: var(--palette-FFF);
+            --base-admin-input-border: var(--palette-CCC);
+
+            --color-button-primary-bg: var(--palette-306);
+            --color-button-danger-bg: var(--palette-800);
+            --color-button-secondary-bg: var(--palette-EEE);
+            --color-link: var(--palette-306);
+            --color-link-danger: var(--palette-800);
+            --color-active: var(--palette-translucent-0002);
+            --color-bg-hover: var(--palette-EEE);
+            --color-bg-table-header: var(--palette-EEE);
+        }
+        
+        /* 第三階層: 具象的な定義 */
+        :root {
+            /* テキスト・背景 */
+            --color-text: var(--base-secondary);
+            --color-text-inverse: var(--base-primary);
+            --color-background: var(--base-primary);
+            --color-background-alt: var(--base-tertiary);
+
+            /* 管理画面UIの具体的定義 */
+            --admin-color-link: var(--color-link);
+            --admin-color-link-danger: var(--color-link-danger);
+            --admin-color-active: var(--color-active);
+            --admin-color-bg-hover: var(--color-bg-hover);
+            --admin-color-bg-table-header: var(--color-bg-table-header);
+            --admin-color-button-primary-bg: var(--color-button-primary-bg);
+            --admin-color-button-danger-bg: var(--color-button-danger-bg);
+            --admin-color-button-secondary-bg: var(--color-button-secondary-bg);
+            --admin-color-border: var(--base-admin-border);
+            --admin-color-input-border: var(--base-admin-input-border);
+            --admin-color-bg: var(--base-admin-bg);
+            
+            /* フォントスケール */
+            --font-scale-base: 1em;
+            --font-scale-ratio: 1.25;
+            --font-size-sm: calc(var(--font-scale-base) / var(--font-scale-ratio));
+            --font-size-md: calc(var(--font-scale-base));
+            --font-size-lg: calc(var(--font-size-md) * var(--font-scale-ratio) * var(--font-scale-ratio));
+            --font-size-xl: calc(var(--font-size-lg) * var(--font-scale-ratio) * var(--font-scale-ratio) * var(--font-scale-ratio) * var(--font-scale-ratio));
+        }
+
+        /* --- 基本スタイルリセットと設定 (★ 第三階層変数を参照) --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { overflow-x: hidden; height: 100%; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--admin-color-bg); /* L3 */
+            color: var(--color-text); /* L3 */
+            line-height: 1.6; 
+            font-size: var(--font-size-md); /* L3 */
+        }
+        
+        h1, h2, h3, h4 { margin-bottom: 1em; font-weight: 600; line-height: 1.3; }
+        h1 { font-size: var(--font-size-xl); }
+        h2 { font-size: var(--font-size-lg); }
+        h3 { font-size: var(--font-size-md); }
+        p { margin-bottom: 1em; }
+        a { color: var(--admin-color-link); text-decoration: none; cursor: pointer; } /* L3 */
+        a:hover { text-decoration: underline; }
+        img { max-width: 100%; height: auto; display: block; }
+        
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid var(--admin-color-border); padding: 0.75em; text-align: left; vertical-align: middle; } /* L3 */
+        th { background-color: var(--admin-color-bg-table-header); } /* L3 */
+        tr:hover { background-color: var(--admin-color-bg-hover); } /* L3 */
+
+        /* ---
+         * 管理画面専用スタイル (Admin Styles) (★ 第三階層変数を参照)
+         * --- */
+
+        .admin-layout { display: flex; height: 100vh; }
+
+        /* サイドバー */
+        .admin-sidebar {
+            width: 240px;
+            background-color: var(--base-admin-sidebar-bg); /* (L2) */
+            color: var(--color-text-inverse); /* (L3) */
+            padding: 1.5em;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+        .admin-sidebar h1 { font-size: var(--font-size-md); margin-bottom: 2em; font-weight: bold; }
+        .admin-sidebar h1 a { color: inherit; text-decoration: none; }
+        .admin-sidebar nav ul { list-style: none; }
+        .admin-sidebar nav li { margin-bottom: 0.5em; }
+        .admin-sidebar nav li.divider { margin: 1em 0; border-top: 1px solid var(--base-tertiary); } /* (L2) */
+        .admin-sidebar nav a { display: block; padding: 0.75em 1em; border-radius: 4px; color: var(--color-text-inverse); text-decoration: none; transition: background-color 0.2s ease; }
+        .admin-sidebar nav a:hover { background-color: var(--base-quinary); text-decoration: none; } /* (L2) */
+        .admin-sidebar nav a.active { background-color: var(--admin-color-active); font-weight: bold; } /* L3 */
+        
+        /* メインコンテンツエリア */
+        .admin-main { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        
+        .admin-header {
+            background-color: var(--base-admin-header-bg); /* (L2) */
+            border-bottom: 1px solid var(--admin-color-border); /* L3 */
+            padding: 1.5em 2em;
+            flex-shrink: 0;
+        }
+        .admin-header h2 { font-size: var(--font-size-lg); margin-bottom: 0; }
+        
+        .admin-content { padding: 2em; flex-grow: 1; }
+        
+        /* ページ切り替え */
+        .admin-page-content { display: none; }
+        .admin-page-content.active { display: block; }
+
+        /* セクション */
+        .admin-section {
+            background-color: var(--base-admin-content-bg); /* (L2) */
+            border: 1px solid var(--admin-color-border); /* L3 */
+            border-radius: 8px;
+            margin-bottom: 2em;
+        }
+        .admin-section h3 {
+            font-size: var(--font-size-md);
+            padding: 1em 1.5em;
+            border-bottom: 1px solid var(--admin-color-border); /* L3 */
+            margin-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-section-content { padding: 1.5em; }
+        .admin-section-footer {
+            padding: 1em 1.5em;
+            border-top: 1px solid var(--admin-color-border); /* L3 */
+            background-color: var(--admin-color-bg-hover); /* L3 */
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5em;
+        }
+        
+        /* フォーム要素 */
+        .form-group { margin-bottom: 1.5em; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5em; }
+        .form-control {
+            width: 100%; padding: 0.75em; font-size: var(--font-size-md); line-height: 1.5;
+            color: var(--color-text); background-color: var(--base-admin-input-bg); /* (L2) */
+            border: 1px solid var(--admin-color-input-border); /* L3 */
+            border-radius: 4px;
+        }
+        textarea.form-control { min-height: 120px; }
+        .form-check { display: flex; align-items: center; margin-bottom: 0.5em; }
+        .form-check input[type="checkbox"] { margin-right: 0.5em; width: 1.2em; height: 1.2em; }
+        .form-control-sm { width: auto; display: inline-block; min-width: 200px; }
+        .form-inline { display: flex; gap: 0.5em; align-items: center; }
+
+        /* ボタン */
+        .admin-button {
+            display: inline-block; padding: 0.75em 1.5em; font-size: var(--font-size-md);
+            font-weight: 600; text-align: center; cursor: pointer; border: none;
+            border-radius: 4px; text-decoration: none; transition: opacity 0.2s ease;
+        }
+        .admin-button:hover { opacity: 0.8; text-decoration: none; }
+        .admin-button-primary { background-color: var(--admin-color-button-primary-bg); color: var(--color-text-inverse); } /* L3 */
+        .admin-button-secondary { background-color: var(--admin-color-button-secondary-bg); color: var(--color-text); border: 1px solid var(--admin-color-border); } /* L3 */
+        .admin-button-danger { background-color: var(--admin-color-button-danger-bg); color: var(--color-text-inverse); } /* L3 */
+        .admin-button-sm { padding: 0.25em 0.75em; font-size: var(--font-size-sm); font-weight: normal; }
+
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; }
+
+        /* フィールド定義リスト (コンテンツタイプ編集用) */
+        .field-list { list-style: none; }
+        .field-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1em; border: 1px solid var(--admin-color-border); /* L3 */
+            border-radius: 4px;
+            margin-bottom: 0.5em; background: var(--palette-FFF);
+        }
+        .field-item .handle { cursor: move; margin-right: 1em; color: var(--base-tertiary); }
+        .field-item-label { flex-grow: 1; }
+        .field-item-label .name { font-weight: 600; }
+        .field-item-label .type { font-size: var(--font-size-sm); color: var(--base-tertiary); margin-left: 0.5em; }
+        .field-item-actions { display: flex; gap: 0.5em; }
+        
+        /* ギャラリーアップローダー (簡易) */
+        .gallery-uploader {
+            border: 2px dashed var(--admin-color-border); /* L3 */
+            border-radius: 4px;
+            padding: 2em;
+            text-align: center;
+            background: var(--admin-color-bg-hover); /* L3 */
+        }
+        .gallery-previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1em; margin-top: 1em; }
+        .gallery-previews img { width: 100%; height: 100px; object-fit: cover; border: 1px solid var(--admin-color-border); border-radius: 4px; } /* L3 */
+        
+        /* メニュービルダー */
+        .menu-builder ul {
+            list-style: none;
+            border: 1px solid var(--admin-color-border); /* L3 */
+            border-radius: 4px;
+            max-width: 400px;
+        }
+        .menu-builder li {
+            padding: 0.75em 1em;
+            border-bottom: 1px solid var(--admin-color-border); /* L3 */
+            display: flex;
+            align-items: center;
+            background: var(--palette-FFF);
+        }
+        .menu-builder li:last-child { border-bottom: none; }
+        .menu-builder li .handle {
+             cursor: move;
+             margin-right: 1em;
+             color: var(--base-tertiary);
+        }
+        .menu-builder li .label { flex-grow: 1; }
+    </style>
+</head>
+<body class="admin-layout">
+    
+    <div class="admin-sidebar">
+        <h1><a href="#" class="admin-nav-link" data-target="settings-page">p2519 管理画面</a></h1>
+        <nav>
+            <ul id="admin-sidebar-nav">
+                <li><a href="#" class="admin-nav-link active" data-target="settings-page">サイト設定</a></li>
+                <li><a href="#" class="admin-nav-link" data-target="types-list-page">コンテンツタイプ</a></li>
+                
+                <li class="divider"></li>
+                
+                <li><a href="#" class="admin-nav-link" data-target="content-list-page" data-type-name="作品" data-type-id="artworks">作品</a></li>
+                <li><a href="#" class="admin-nav-link" data-target="content-list-page" data-type-name="モデル" data-type-id="models">モデル</a></li>
+                
+                <li class="divider"></li>
+                
+                <li><a href="index.html">ログアウト</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="admin-main">
+        
+        <header class="admin-header">
+            <h2 id="admin-page-title">サイト設定</h2>
+        </header>
+
+        <main class="admin-content">
+
+            <div id="settings-page" class="admin-page-content active">
+                
+                <section class="admin-section">
+                    <h3>基本情報</h3>
+                    <div class="admin-section-content">
+                        <div class="form-group">
+                            <label for="site-name">サイト名</label>
+                            <input type="text" id="site-name" class="form-control" value="p2519">
+                        </div>
+                        <div class="form-group">
+                            <label for="site-kv">サイトのキービジュアル (デフォルト)</label>
+                            <input type="file" id="site-kv" class="form-control">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <h3>フッターナビゲーション設定</h3>
+                    <div class="admin-section-content">
+                        <p style="margin-bottom: 1.5em;">フッターに表示する項目を管理します。（ドラッグ＆ドロップで並び替え可能）</p>
+                        <div class="menu-builder">
+                           <ul>
+                               <li><span class="handle">☰</span> <span class="label">作品</span> <input type="checkbox" checked> 表示</li>
+                               <li><span class="handle">☰</span> <span class="label">モデル</span> <input type="checkbox" checked> 表示</li>
+                               <li><span class="handle">☰</span> <span class="label">その他 (管理画面リンク)</span> <input type="checkbox" checked> 表示</li>
+                           </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <h3>新着情報 設定</h3>
+                    <div class="admin-section-content">
+                        <p style="margin-bottom: 1.5em;">コンテンツの作成・更新時に、フロントの「新着情報」欄に自動で掲載するコンテンツタイプを選択します。</p>
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" id="news-artworks" checked>
+                                <label for="news-artworks">作品 (artworks)</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="news-models" checked>
+                                <label for="news-models">モデル (models)</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <button type="submit" class="admin-button admin-button-primary">保存する</button>
+
+            </div>
+
+            <div id="types-list-page" class="admin-page-content">
+                <div class="page-header">
+                    <h3>コンテンツタイプ一覧</h3>
+                    <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="types-edit-page" data-type-name="新規タイプ">新規タイプ作成</a>
+                </div>
+                <table>
+                    <thead> <tr> <th>タイプ名</th> <th>API ID</th> <th>フィールド数</th> <th>操作</th> </tr> </thead>
+                    <tbody>
+                        <tr>
+                            <td>作品</td>
+                            <td>artworks</td>
+                            <td>6</td>
+                            <td>
+                                <a href="#" class="admin-nav-link" data-target="types-edit-page" data-type-name="作品" data-type-id="artworks">編集</a> | 
+                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                        </tr>
+                        <tr>
+                            <td>モデル</td>
+                            <td>models</td>
+                            <td>7</td>
+                            <td>
+                                <a href="#" class="admin-nav-link" data-target="types-edit-page" data-type-name="モデル" data-type-id="models">編集</a> | 
+                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="types-edit-page" class="admin-page-content">
+                
+                <section class="admin-section">
+                    <h3>基本設定</h3>
+                    <div class="admin-section-content">
+                        <div class="form-group">
+                            <label for="type-name">タイプ名</label>
+                            <input type="text" id="type-name" class="form-control" value="作品">
+                        </div>
+                        <div class="form-group">
+                            <label for="type-api-id">API ID</label>
+                            <input type="text" id="type-api-id" class="form-control" value="artworks">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <h3>
+                        <span>フィールド定義</span>
+                        <a href="#" class="admin-button admin-button-secondary admin-button-sm">フィールドを追加</a>
+                    </h3>
+                    <div class="admin-section-content">
+                        <ul class="field-list">
+                            <li class="field-item">
+                                <span class="handle">☰</span>
+                                <div class="field-item-label"> <span class="name">作品タイトル</span> <span class="type">テキスト (短文)</span> </div>
+                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                            <li class="field-item">
+                                <span class="handle">☰</span>
+                                <div class="field-item-label"> <span class="name">制作時期</span> <span class="type">テキスト (短文)</span> </div>
+                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                            <li class="field-item">
+                                <span class="handle">☰</span>
+                                <div class="field-item-label"> <span class="name">キービジュアル画像</span> <span class="type">画像 (単一)</span> </div>
+                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                            <li class="field-item">
+                                <span class="handle">☰</span>
+                                <div class="field-item-label"> <span class="name">ギャラリー画像</span> <span class="type">画像 (ギャラリー)</span> </div>
+                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                            <li class="field-item">
+                                <span class="handle">☰</span>
+                                <div class="field-item-label"> <span class="name">使用モデル</span> <span class="type">リレーション (モデル)</span> </div>
+                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                        </ul>
+                    </div>
+                    <div class="admin-section-footer">
+                        <a href="#" class="admin-button admin-button-secondary admin-nav-link" data-target="types-list-page">キャンセル</a>
+                        <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="types-list-page">保存する</a>
+                    </div>
+                </section>
+            </div>
+
+            <div id="content-list-page" class="admin-page-content">
+                <div class="page-header">
+                    <h3 id="content-list-title">（ここにタイプ名が入る）</h3>
+                    <a href="#" id="content-list-new-button" class="admin-button admin-button-primary admin-nav-link" data-target="content-entry-page" data-entry-name="新規作成" data-type-id="" data-type-name="">新規作成</a>
+                </div>
+                
+                <table id="content-list-table-artworks" class="content-list-table" style="display: none;">
+                    <thead> <tr> <th>作品タイトル</th> <th>制作時期</th> <th>操作</th> </tr> </thead>
+                    <tbody>
+                        <tr>
+                            <td>作品タイトル 1</td> <td>2024年</td>
+                            <td>
+                                <a href="#" class="admin-nav-link" data-target="content-entry-page" data-entry-name="作品タイトル 1" data-type-id="artworks" data-type-name="作品">編集</a> | 
+                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                        </tr>
+                        <tr>
+                            <td>作品タイトル 2</td> <td>2025年</td>
+                            <td>
+                                <a href="#" class="admin-nav-link" data-target="content-entry-page" data-entry-name="作品タイトル 2" data-type-id="artworks" data-type-name="作品">編集</a> | 
+                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <table id="content-list-table-models" class="content-list-table" style="display: none;">
+                    <thead> <tr> <th>氏名</th> <th>ふりがな</th> <th>操作</th> </tr> </thead>
+                    <tbody>
+                        <tr>
+                            <td>モデル名 1</td> <td>もでるめい 1</td>
+                            <td>
+                                <a href="#" class="admin-nav-link" data-target="content-entry-page" data-entry-name="モデル名 1" data-type-id="models" data-type-name="モデル">編集</a> | 
+                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="content-entry-page" class="admin-page-content">
+                
+                <div id="content-entry-form-container">
+                    
+                    <section class="admin-section">
+                        <h3 id="content-entry-form-title">（ここに動的タイトルが入る）</h3>
+                        <div class="admin-section-content">
+                            <div class="form-group">
+                                <label for="entry-field-title">作品タイトル</label>
+                                <input type="text" id="entry-field-title" class="form-control" value="作品タイトル 1">
+                            </div>
+                            <div class="form-group">
+                                <label for="entry-field-date">制作時期</label>
+                                <input type="text" id="entry-field-date" class="form-control" value="2024年">
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section class="admin-section">
+                        <h3>キービジュアル画像</h3>
+                        <div class="admin-section-content">
+                             <div class="form-group">
+                                <label for="entry-field-kv">画像アップロード</label>
+                                <input type="file" id="entry-field-kv" class="form-control">
+                                <img src="images/artworks/matsurika/matsurika_001.jpg" alt="プレビュー" style="max-width: 200px; margin-top: 1em;">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="admin-section">
+                        <h3>ギャラリー画像</h3>
+                        <div class="admin-section-content">
+                            <div class="gallery-uploader">
+                                <p>画像をドラッグ＆ドロップ、または</p>
+                                <input type="file" multiple>
+                            </div>
+                            <div class="gallery-previews">
+                                <img src="images/artworks/matsurika/matsurika_001.jpg" alt="サンプル 1">
+                                <img src="images/artworks/matsurika/matsurika_002.jpg" alt="サンプル 2">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="admin-section">
+                        <h3>使用モデル (リレーション)</h3>
+                        <div class="admin-section-content">
+                            <div class="form-group">
+                                <label for="entry-field-models">モデルを選択</label>
+                                <select id="entry-field-models" class="form-control" multiple>
+                                    <option value="model01" selected>モデル名 1</option>
+                                    <option value="model02">（未登録のモデル）</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <div class="admin-section-footer" style="background: transparent; border: none; padding-right: 0;">
+                        <a href="#" class="admin-button admin-button-secondary admin-nav-link" data-target="content-list-page" data-type-id="artworks" data-type-name="作品">キャンセル</a>
+                        <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="content-list-page" data-type-id="artworks" data-type-name="作品">保存する</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- DOMキャッシュ ---
+            const pageTitle = document.getElementById('admin-page-title');
+            const pages = document.querySelectorAll('.admin-page-content');
+            const sidebarLinks = document.querySelectorAll('.admin-sidebar .admin-nav-link');
+            
+            // コンテンツ一覧ページの動的要素
+            const contentListTitle = document.getElementById('content-list-title');
+            const contentListNewButton = document.getElementById('content-list-new-button');
+            const contentListTables = document.querySelectorAll('.content-list-table');
+            
+            // コンテンツ編集ページの動的要素
+            const entryFormContainer = document.getElementById('content-entry-form-container');
+            const entryFormTitle = document.getElementById('content-entry-form-title'); // 編集ページのH3
+            
+            // 現在のコンテンツタイプを追跡する（編集ページ→一覧ページに戻るため）
+            let currentTypeId = null;
+
+            /**
+             * 1. ページ表示を切り替える (単純な表示/非表示)
+             */
+            function showPage(targetPageId) {
+                if (!targetPageId) return;
+                pages.forEach(page => {
+                    page.classList.toggle('active', page.id === targetPageId);
+                });
+            }
+
+            /**
+             * 2. (★ 修正) サイドバーのアクティブ状態を更新する
+             */
+            function updateSidebarActiveState(targetId, typeId) {
+                sidebarLinks.forEach(link => {
+                    const linkTarget = link.dataset.target;
+                    const linkTypeId = link.dataset.typeId;
+
+                    let isActive = false; // デフォルトは非アクティブ
+
+                    if (linkTarget === 'settings-page') {
+                        // --- 1.「サイト設定」リンク ---
+                        // 遷移先が「サイト設定」ならアクティブ
+                        isActive = (targetId === 'settings-page');
+
+                    } else if (linkTarget === 'types-list-page') {
+                        // --- 2.「コンテンツタイプ」リンク ---
+                        // 遷移先が「タイプ一覧」または「タイプ編集」ならアクティブ
+                        isActive = (targetId === 'types-list-page' || targetId === 'types-edit-page');
+
+                    } else if (linkTarget === 'content-list-page') {
+                        // --- 3.「作品」や「モデル」などのコンテンツリンク ---
+                        // 遷移先が「エントリー一覧」または「エントリー編集」
+                        // *かつ*
+                        // リンクのタイプIDと現在のタイプIDが一致するならアクティブ
+                        isActive = (targetId === 'content-list-page' || targetId === 'content-entry-page') 
+                                     && (linkTypeId === typeId);
+                    }
+                    
+                    link.classList.toggle('active', isActive);
+                });
+            }
+            
+            /**
+             * 3. メインヘッダーのタイトルを更新する
+             */
+            function updatePageTitle(target, targetId) {
+                // data-* 属性から情報を取得
+                const typeName = target.dataset.typeName || '...';
+                const entryName = target.dataset.entryName || '...';
+                let title = target.textContent; // デフォルト
+
+                if (targetId === 'settings-page' || targetId === 'types-list-page') {
+                    title = target.textContent;
+                } 
+                else if (targetId === 'types-edit-page') {
+                    title = (typeName === '新規タイプ') ? '新規コンテンツタイプ作成' : `${typeName}を編集`;
+                } 
+                else if (targetId === 'content-list-page') {
+                    title = `${typeName}一覧`;
+                } 
+                else if (targetId === 'content-entry-page') {
+                    title = (entryName === '新規作成') ? `${typeName}: 新規作成` : `${typeName}: ${entryName}を編集`;
+                }
+                
+                pageTitle.textContent = title;
+            }
+
+            /**
+             * 4. コンテンツ一覧ページ(汎用)の内容をセットアップする
+             */
+            function setupContentListPage(typeId, typeName) {
+                if (!typeId || !typeName) return;
+                
+                currentTypeId = typeId; // 現在のタイプIDを記憶
+                
+                contentListTitle.textContent = `${typeName}一覧`;
+                contentListNewButton.dataset.typeId = typeId;
+                contentListNewButton.dataset.typeName = typeName;
+                
+                contentListTables.forEach(tbl => {
+                    tbl.style.display = (tbl.id === `content-list-table-${typeId}`) ? 'table' : 'none';
+                });
+            }
+            
+             /**
+             * 5. コンテンツ編集ページ(汎用)の内容をセットアップする
+             */
+            function setupContentEntryPage(typeId, typeName, entryName) {
+                if (!typeId || !typeName) return;
+                
+                currentTypeId = typeId; // 現在のタイプIDを記憶
+                
+                // 本来はここで typeId に基づいてフォームを動的に構築する
+                console.log(`フォームを構築: ${typeName} (${typeId}), ${entryName}`);
+                
+                // モックアップとして、編集ページのH3タイトルとフッターボタンを更新
+                if (entryName === '新規作成') {
+                    entryFormTitle.textContent = `${typeName}: 新規作成`;
+                } else {
+                    entryFormTitle.textContent = `${typeName}: ${entryName}を編集`;
+                }
+                
+                entryFormContainer.querySelectorAll('.admin-nav-link').forEach(link => {
+                     link.dataset.typeId = typeId;
+                     link.dataset.typeName = typeName;
+                });
+            }
+
+
+            /**
+             * 6. (★メイン) クリックイベントのハンドラ (イベントデリゲーション)
+             */
+            document.body.addEventListener('click', (e) => {
+                // クリックされた要素、またはその親が .admin-nav-link かどうかを探す
+                const targetLink = e.target.closest('.admin-nav-link');
+                
+                if (!targetLink) { // .admin-nav-link 以外は無視
+                    return;
+                }
+                
+                e.preventDefault(); // リンクのデフォルト動作（ハッシュ遷移）をキャンセル
+                
+                const dataset = targetLink.dataset;
+                const targetId = dataset.target;
+                
+                // 遷移先のページIDが指定されていなければ何もしない
+                if (!targetId) {
+                    console.error('クリックされたリンクに data-target がありません。', targetLink);
+                    return;
+                }
+
+                // 遷移元のリンクから情報を取得
+                // リンク自体が typeId を持っていない場合 (例: キャンセルボタン)、
+                // 記憶している currentTypeId を使う
+                const typeId = dataset.typeId || currentTypeId;
+                const typeName = dataset.typeName;
+                const entryName = dataset.entryName;
+
+                // --- 1. ページ固有のセットアップ ---
+                if (targetId === 'content-list-page') {
+                    setupContentListPage(typeId, typeName);
+                } 
+                else if (targetId === 'content-entry-page') {
+                    setupContentEntryPage(typeId, typeName, entryName);
+                } 
+                else if (targetId === 'settings-page' || targetId === 'types-list-page' || targetId === 'types-edit-page') {
+                     // 編集ページから一覧に戻る際、typeIdが残っていると
+                     // updateSidebarActiveState が誤動作するため、
+                     // コンテンツ系以外のページに遷移するときは null にリセットする
+                     if (targetId !== 'types-edit-page') {
+                        currentTypeId = null; 
+                     }
+                }
+
+                // --- 2. 汎用的な画面更新 ---
+                updatePageTitle(targetLink, targetId);
+                updateSidebarActiveState(targetId, typeId); // (★ 修正されたロジックが呼ばれる)
+                showPage(targetId);
+            });
+
+            // --- 初期表示 ---
+            // 最初に表示すべきリンク（.active を持つ "サイト設定"）を探してクリックする
+            const initialLink = document.querySelector('.admin-sidebar .admin-nav-link.active');
+            if (initialLink) {
+                initialLink.click();
+            }
+        });
+    </script>
+
+</body>
+</html>
