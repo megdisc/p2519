@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>p2519 - 管理画面</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <style>
         /* --- 
          * スタイリング定義 (★ 厳格な3階層カラー定義)
@@ -94,12 +95,19 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { overflow-x: hidden; height: 100%; }
         
+        /* プロポーショナル設定(palt)を追加 */
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: "Yu Gothic", YuGothic, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 500; 
+            
             background-color: var(--admin-color-bg); /* L3 */
             color: var(--color-text); /* L3 */
             line-height: 1.6; 
             font-size: var(--font-size-md); /* L3 */
+            
+            /* 文字詰め */
+            font-feature-settings: 'palt';
+            -webkit-font-feature-settings: 'palt';
         }
         
         h1, h2, h3, h4 { margin-bottom: 1em; font-weight: 600; line-height: 1.3; }
@@ -115,6 +123,20 @@
         th, td { border: 1px solid var(--admin-color-border); padding: 0.75em; text-align: left; vertical-align: middle; } /* L3 */
         th { background-color: var(--admin-color-bg-table-header); } /* L3 */
         tr:hover { background-color: var(--admin-color-bg-hover); } /* L3 */
+        
+        /* テーブル内の操作セルを中央揃え */
+        table td.actions {
+            text-align: center;
+            display: flex;
+            gap: 0.25em;
+            justify-content: center;
+            border-bottom: 1px solid var(--admin-color-border); /* (tr:hover対策で上書き) */
+            border-top: 1px solid var(--admin-color-border);
+        }
+        tr:hover td.actions {
+             background-color: var(--admin-color-bg-hover);
+        }
+
 
         /* ---
          * 管理画面専用スタイル (Admin Styles) (★ 第三階層変数を参照)
@@ -131,12 +153,29 @@
             flex-shrink: 0;
             overflow-y: auto;
         }
-        .admin-sidebar h1 { font-size: var(--font-size-md); margin-bottom: 2em; font-weight: bold; }
+        
+        /* サイドバー見出し (中央配置・サイズ変更) */
+        .admin-sidebar h1 { 
+            font-size: var(--font-size-lg); 
+            margin-bottom: 2em; 
+            font-weight: bold; 
+            text-align: center; 
+        }
         .admin-sidebar h1 a { color: inherit; text-decoration: none; }
         .admin-sidebar nav ul { list-style: none; }
         .admin-sidebar nav li { margin-bottom: 0.5em; }
         .admin-sidebar nav li.divider { margin: 1em 0; border-top: 1px solid var(--base-tertiary); } /* (L2) */
-        .admin-sidebar nav a { display: block; padding: 0.75em 1em; border-radius: 4px; color: var(--color-text-inverse); text-decoration: none; transition: background-color 0.2s ease; }
+        
+        /* サイドバーリンク (中央配置) */
+        .admin-sidebar nav a { 
+            display: block; 
+            padding: 0.75em 1em; 
+            border-radius: 4px; 
+            color: var(--color-text-inverse); 
+            text-decoration: none; 
+            transition: background-color 0.2s ease; 
+            text-align: center; 
+        }
         .admin-sidebar nav a:hover { background-color: var(--base-quinary); text-decoration: none; } /* (L2) */
         .admin-sidebar nav a.active { background-color: var(--admin-color-active); font-weight: bold; } /* L3 */
         
@@ -182,10 +221,26 @@
             justify-content: flex-end;
             gap: 0.5em;
         }
+
+        /* ページ全体のアクションボタンエリア */
+        .page-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5em;
+            margin-top: 2em; /* .admin-section の margin-bottom と合わせる */
+        }
+
         
         /* フォーム要素 */
         .form-group { margin-bottom: 1.5em; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 0.5em; }
+        .form-group .form-help-text {
+            font-size: var(--font-size-sm); 
+            color: var(--base-tertiary); 
+            margin-top: -0.5em; 
+            margin-bottom: 1em;
+            font-weight: normal;
+        }
         .form-control {
             width: 100%; padding: 0.75em; font-size: var(--font-size-md); line-height: 1.5;
             color: var(--color-text); background-color: var(--base-admin-input-bg); /* (L2) */
@@ -194,13 +249,55 @@
         }
         textarea.form-control { min-height: 120px; }
         .form-check { display: flex; align-items: center; margin-bottom: 0.5em; }
-        .form-check input[type="checkbox"] { margin-right: 0.5em; width: 1.2em; height: 1.2em; }
+        .form-check input[type="checkbox"] { margin: 0 0.5em 0 0; width: 1.2em; height: 1.2em; }
+        .form-check label { margin-bottom: 0; font-weight: normal; }
+
         .form-control-sm { width: auto; display: inline-block; min-width: 200px; }
         .form-inline { display: flex; gap: 0.5em; align-items: center; }
+        .form-inline label { margin-bottom: 0; font-weight: normal; }
+
+        /* ファイル選択UI */
+        .file-input-advanced {
+            border: 1px solid var(--admin-color-input-border);
+            border-radius: 4px;
+            background: var(--admin-color-bg-hover);
+            padding: 1em;
+            display: flex;
+            align-items: center;
+            gap: 1em;
+        }
+        .file-input-preview {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            background: var(--palette-FFF);
+            border: 1px solid var(--admin-color-border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-sm);
+            color: var(--base-tertiary);
+            overflow: hidden;
+        }
+        .file-input-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .file-input-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+            align-items: flex-start;
+        }
+
 
         /* ボタン */
         .admin-button {
-            display: inline-block; padding: 0.75em 1.5em; font-size: var(--font-size-md);
+            display: inline-flex; /* (flexに変更) */
+            align-items: center; /* (アイコンとテキストの中央揃え) */
+            padding: 0.75em 1.5em; font-size: var(--font-size-md);
             font-weight: 600; text-align: center; cursor: pointer; border: none;
             border-radius: 4px; text-decoration: none; transition: opacity 0.2s ease;
         }
@@ -209,6 +306,41 @@
         .admin-button-secondary { background-color: var(--admin-color-button-secondary-bg); color: var(--color-text); border: 1px solid var(--admin-color-border); } /* L3 */
         .admin-button-danger { background-color: var(--admin-color-button-danger-bg); color: var(--color-text-inverse); } /* L3 */
         .admin-button-sm { padding: 0.25em 0.75em; font-size: var(--font-size-sm); font-weight: normal; }
+
+        /* アイコンスタイル */
+        .material-icons-outlined {
+            vertical-align: middle;
+        }
+        .admin-button .material-icons-outlined {
+            margin-right: 0.4em; /* アイコンとテキストの間隔 */
+            font-size: 1.25em;
+        }
+        .admin-button-sm .material-icons-outlined {
+            margin-right: 0.25em;
+            font-size: 1.1em;
+        }
+        
+        /* アイコンのみのリンク (テーブル内など) */
+        .admin-icon-link {
+            display: inline-block;
+            vertical-align: middle;
+            text-decoration: none;
+            color: var(--admin-color-link);
+            padding: 0.25em 0.4em;
+            border-radius: 4px;
+        }
+        .admin-icon-link:hover {
+            background-color: var(--admin-color-bg-hover);
+            text-decoration: none;
+        }
+        .admin-icon-link .material-icons-outlined {
+            font-size: 1.25em; /* (20px) */
+            vertical-align: middle;
+        }
+        .admin-icon-link.danger {
+            color: var(--admin-color-link-danger);
+        }
+
 
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; }
 
@@ -220,7 +352,15 @@
             border-radius: 4px;
             margin-bottom: 0.5em; background: var(--palette-FFF);
         }
-        .field-item .handle { cursor: move; margin-right: 1em; color: var(--base-tertiary); }
+        /* ドラッグハンドル */
+        .field-item .handle {
+            cursor: move;
+            margin-right: 1em;
+            color: var(--base-tertiary);
+        }
+        .handle .material-icons-outlined {
+             vertical-align: middle;
+        }
         .field-item-label { flex-grow: 1; }
         .field-item-label .name { font-weight: 600; }
         .field-item-label .type { font-size: var(--font-size-sm); color: var(--base-tertiary); margin-left: 0.5em; }
@@ -252,6 +392,7 @@
             background: var(--palette-FFF);
         }
         .menu-builder li:last-child { border-bottom: none; }
+        /* ドラッグハンドル */
         .menu-builder li .handle {
              cursor: move;
              margin-right: 1em;
@@ -263,11 +404,14 @@
 <body class="admin-layout">
     
     <div class="admin-sidebar">
-        <h1><a href="#" class="admin-nav-link" data-target="settings-page">p2519 管理画面</a></h1>
+        <h1>管理画面</h1>
         <nav>
             <ul id="admin-sidebar-nav">
-                <li><a href="#" class="admin-nav-link active" data-target="settings-page">サイト設定</a></li>
-                <li><a href="#" class="admin-nav-link" data-target="types-list-page">コンテンツタイプ</a></li>
+                <li><a href="#" class="admin-nav-link active" data-target="settings-page">基本設定</a></li>
+                <li><a href="#" class="admin-nav-link" data-target="types-list-page">コンテンツ</a></li>
+                <li><a href="#" class="admin-nav-link" data-target="navigation-page">ナビゲーション</a></li>
+                <li><a href="#" class="admin-nav-link" data-target="home-settings-page">ホーム画面</a></li>
+                <li><a href="#" class="admin-nav-link" data-target="storage-page">ストレージ</a></li>
                 
                 <li class="divider"></li>
                 
@@ -276,6 +420,7 @@
                 
                 <li class="divider"></li>
                 
+                <li><a href="#" class="admin-nav-link" data-target="account-page">ユーザーアカウント</a></li>
                 <li><a href="index.html">ログアウト</a></li>
             </ul>
         </nav>
@@ -284,7 +429,7 @@
     <div class="admin-main">
         
         <header class="admin-header">
-            <h2 id="admin-page-title">サイト設定</h2>
+            <h2 id="admin-page-title">基本設定</h2>
         </header>
 
         <main class="admin-content">
@@ -299,51 +444,246 @@
                             <input type="text" id="site-name" class="form-control" value="p2519">
                         </div>
                         <div class="form-group">
-                            <label for="site-kv">サイトのキービジュアル (デフォルト)</label>
-                            <input type="file" id="site-kv" class="form-control">
+                            <label for="site-favicon">サイトのアイコン (Favicon)</label>
+                            <div class="file-input-advanced">
+                                <div class="file-input-preview">
+                                    <span>プレビュー</span>
+                                </div>
+                                <div class="file-input-actions">
+                                    <div class="form-inline">
+                                        <a href="#" class="admin-button admin-button-secondary admin-button-sm"><span class="material-icons-outlined">folder_open</span>ストレージから選択</a>
+                                        <label style="margin-left: 0.5em; margin-right: 0.5em;">または</label>
+                                        <input type="file" id="site-favicon-upload" class="form-control" style="width: auto;">
+                                    </div>
+                                    <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 <section class="admin-section">
-                    <h3>フッターナビゲーション設定</h3>
+                    <h3>SEO・メタ情報</h3>
                     <div class="admin-section-content">
-                        <p style="margin-bottom: 1.5em;">フッターに表示する項目を管理します。（ドラッグ＆ドロップで並び替え可能）</p>
-                        <div class="menu-builder">
-                           <ul>
-                               <li><span class="handle">☰</span> <span class="label">作品</span> <input type="checkbox" checked> 表示</li>
-                               <li><span class="handle">☰</span> <span class="label">モデル</span> <input type="checkbox" checked> 表示</li>
-                               <li><span class="handle">☰</span> <span class="label">その他 (管理画面リンク)</span> <input type="checkbox" checked> 表示</li>
-                           </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="admin-section">
-                    <h3>新着情報 設定</h3>
-                    <div class="admin-section-content">
-                        <p style="margin-bottom: 1.5em;">コンテンツの作成・更新時に、フロントの「新着情報」欄に自動で掲載するコンテンツタイプを選択します。</p>
                         <div class="form-group">
+                            <label for="site-description">サイトの説明 (meta description)</label>
+                            <textarea id="site-description" class="form-control" rows="3" placeholder="サイトの説明文を入力..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>検索エンジン設定</label>
                             <div class="form-check">
-                                <input type="checkbox" id="news-artworks" checked>
-                                <label for="news-artworks">作品 (artworks)</label>
+                                <input type="checkbox" id="seo-noindex">
+                                <label for="seo-noindex">サイト全体を noindex にする (検索結果に表示しない)</label>
                             </div>
                             <div class="form-check">
-                                <input type="checkbox" id="news-models" checked>
-                                <label for="news-models">モデル (models)</label>
+                                <input type="checkbox" id="seo-nofollow">
+                                <label for="seo-nofollow">サイト全体のリンクを nofollow にする</label>
                             </div>
                         </div>
                     </div>
                 </section>
                 
-                <button type="submit" class="admin-button admin-button-primary">保存する</button>
+                <div class="page-actions">
+                    <button type="submit" class="admin-button admin-button-primary"><span class="material-icons-outlined">save</span>保存する</button>
+                </div>
 
             </div>
+            
+            <div id="home-settings-page" class="admin-page-content">
+                <section class="admin-section">
+                    <h3>キービジュアル</h3>
+                    <div class="admin-section-content">
+                        <div class="form-group">
+                            <label for="site-kv">キービジュアル (画像)</label>
+                            <div class="file-input-advanced">
+                                <div class="file-input-preview" style="width: 120px; height: 120px;">
+                                    <span>プレビュー</span>
+                                </div>
+                                <div class="file-input-actions">
+                                    <div class="form-inline">
+                                        <a href="#" class="admin-button admin-button-secondary admin-button-sm"><span class="material-icons-outlined">folder_open</span>ストレージから選択</a>
+                                        <label style="margin-left: 0.5em; margin-right: 0.5em;">または</label>
+                                        <input type="file" id="site-kv-upload" class="form-control" style="width: auto;">
+                                    </div>
+                                    <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="kv-heading">キービジュアル (見出し)</label>
+                            <input type="text" id="kv-heading" class="form-control" value="世界観を表現するキービジュアル">
+                        </div>
+                        <div class="form-group">
+                            <label for="kv-text">キービジュアル (テキスト)</label>
+                            <input type="text" id="kv-text" class="form-control" value="この世界のキャッチコピーや導入文が入ります。">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <h3>コンテンツセクション</h3>
+                    <div class="admin-section-content">
+                        <div class="form-group">
+                            <label>ホームのコンテンツセクション</label>
+                            <p class="form-help-text">表示のON/OFF、表示件数、およびドラッグ＆ドロップでの並び替えが可能です。</p>
+                            <table style="max-width: 600px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px; text-align: center;">並び替え</th>
+                                        <th>セクション名</th>
+                                        <th style="width: 100px; text-align: center;">表示</th>
+                                        <th style="width: 120px;">表示件数</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align: center; cursor: move; color: var(--base-tertiary);"><span class="material-icons-outlined">drag_indicator</span></td>
+                                        <td>作品 (artworks)</td>
+                                        <td style="text-align: center;"><input type="checkbox" id="home-visible-artworks" checked></td>
+                                        <td>
+                                            <input type="number" id="home-count-artworks" class="form-control" value="6" min="1" max="20" style="width: 80px;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: center; cursor: move; color: var(--base-tertiary);"><span class="material-icons-outlined">drag_indicator</span></td>
+                                        <td>モデル (models)</td>
+                                        <td style="text-align: center;"><input type="checkbox" id="home-visible-models" checked></td>
+                                        <td>
+                                            <input type="number" id="home-count-models" class="form-control" value="6" min="1" max="20" style="width: 80px;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: center; cursor: move; color: var(--base-tertiary);"><span class="material-icons-outlined">drag_indicator</span></td>
+                                        <td>新着情報 (news)</td>
+                                        <td style="text-align: center;"><input type="checkbox" id="home-visible-news" checked></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <h3>新着情報</h3>
+                    <div class="admin-section-content">
+                        <div class="form-group">
+                            <label for="news-count">ホームの表示件数</label>
+                            <input type="number" id="news-count" class="form-control" value="5" min="1" max="20" style="width: 100px;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>自動掲載の条件</label>
+                            <p class="form-help-text">
+                                コンテンツを操作した際に、新着情報に自動で追加する条件を選択します。
+                            </p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>コンテンツタイプ</th>
+                                        <th style="text-align: center;">新規投稿時</th>
+                                        <th style="text-align: center;">更新時</th>
+                                        <th style="text-align: center;">削除時</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>作品 (artworks)</td>
+                                        <td style="text-align: center;"><input type="checkbox" id="news-artworks-create" checked></td>
+                                        <td style="text-align: center;"><input type="checkbox" id="news-artworks-update" checked></td>
+                                        <td style="text-align: center;"><input type="checkbox" id="news-artworks-delete"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>モデル (models)</td>
+                                        <td style="text-align: center;"><input type="checkbox" id="news-models-create" checked></td>
+                                        <td style="text-align: center;"><input type="checkbox" id="news-models-update" checked></td>
+                                        <td style="text-align: center;"><input type="checkbox" id="news-models-delete"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="page-actions">
+                    <button type="submit" class="admin-button admin-button-primary"><span class="material-icons-outlined">save</span>保存する</button>
+                </div>
+            </div>
+
+            <div id="navigation-page" class="admin-page-content">
+                <section class="admin-section">
+                    <h3>フッターナビゲーション設定</h3>
+                    <div class="admin-section-content">
+                        <p class="form-help-text" style="margin-top:0;">フッターに表示する項目を管理します。（ドラッグ＆ドロップで並び替え可能）</p>
+                        <div class="menu-builder">
+                           <ul>
+                               <li><span class="handle"><span class="material-icons-outlined">drag_indicator</span></span> <span class="label">作品</span> <input type="checkbox" checked> 表示</li>
+                               <li><span class="handle"><span class="material-icons-outlined">drag_indicator</span></span> <span class="label">モデル</span> <input type="checkbox" checked> 表示</li>
+                               <li><span class="handle"><span class="material-icons-outlined">drag_indicator</span></span> <span class="label">その他 (管理画面リンク)</span> <input type="checkbox" checked> 表示</li>
+                           </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="page-actions">
+                    <button type="submit" class="admin-button admin-button-primary"><span class="material-icons-outlined">save</span>保存する</button>
+                </div>
+            </div>
+
+            <div id="storage-page" class="admin-page-content">
+                <div class="page-header">
+                    <h3>ストレージ</h3>
+                    <a href="#" class="admin-button admin-button-primary"><span class="material-icons-outlined">upload</span>新規アップロード</a>
+                </div>
+                
+                <section class="admin-section">
+                    <h3>アップロード済みファイル</h3>
+                    <div class="admin-section-content">
+                        <div class="gallery-previews">
+                            <img src="images/artworks/matsurika/matsurika_001.jpg" alt="サンプル 1">
+                            <img src="images/artworks/matsurika/matsurika_002.jpg" alt="サンプル 2">
+                            <img src="images/models/model01/model001.jpg" alt="モデル 1">
+                            <img src="images/keyvisual.jpg" alt="KV">
+                            </div>
+                    </div>
+                </section>
+            </div>
+            
+            <div id="account-page" class="admin-page-content">
+                <div class="page-header">
+                    <h3>ユーザーアカウント一覧</h3>
+                    <a href="#" class="admin-button admin-button-primary"><span class="material-icons-outlined">person_add</span>新規アカウント作成</a>
+                </div>
+                <table>
+                    <thead> <tr> <th>ユーザー名</th> <th>メールアドレス</th> <th>権限</th> <th>操作</th> </tr> </thead>
+                    <tbody>
+                        <tr>
+                            <td>admin</td>
+                            <td>admin@example.com</td>
+                            <td>管理者</td>
+                            <td class="actions">
+                                <a href="#" class="admin-icon-link" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>editor</td>
+                            <td>editor@example.com</td>
+                            <td>編集者</td>
+                            <td class="actions">
+                                <a href="#" class="admin-icon-link" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
 
             <div id="types-list-page" class="admin-page-content">
                 <div class="page-header">
                     <h3>コンテンツタイプ一覧</h3>
-                    <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="types-edit-page" data-type-name="新規タイプ">新規タイプ作成</a>
+                    <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="types-edit-page" data-type-name="新規タイプ"><span class="material-icons-outlined">add</span>新規タイプ作成</a>
                 </div>
                 <table>
                     <thead> <tr> <th>タイプ名</th> <th>API ID</th> <th>フィールド数</th> <th>操作</th> </tr> </thead>
@@ -352,17 +692,19 @@
                             <td>作品</td>
                             <td>artworks</td>
                             <td>6</td>
-                            <td>
-                                <a href="#" class="admin-nav-link" data-target="types-edit-page" data-type-name="作品" data-type-id="artworks">編集</a> | 
-                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                            <td class="actions">
+                                <a href="#" class="admin-icon-link admin-nav-link" data-target="types-edit-page" data-type-name="作品" data-type-id="artworks" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                            </td>
                         </tr>
                         <tr>
                             <td>モデル</td>
                             <td>models</td>
                             <td>7</td>
-                            <td>
-                                <a href="#" class="admin-nav-link" data-target="types-edit-page" data-type-name="モデル" data-type-id="models">編集</a> | 
-                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                            <td class="actions">
+                                <a href="#" class="admin-icon-link admin-nav-link" data-target="types-edit-page" data-type-name="モデル" data-type-id="models" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -387,76 +729,102 @@
                 <section class="admin-section">
                     <h3>
                         <span>フィールド定義</span>
-                        <a href="#" class="admin-button admin-button-secondary admin-button-sm">フィールドを追加</a>
+                        <a href="#" class="admin-button admin-button-secondary admin-button-sm"><span class="material-icons-outlined">add</span>フィールドを追加</a>
                     </h3>
                     <div class="admin-section-content">
                         <ul class="field-list">
                             <li class="field-item">
-                                <span class="handle">☰</span>
+                                <span class="handle"><span class="material-icons-outlined">drag_indicator</span></span>
                                 <div class="field-item-label"> <span class="name">作品タイトル</span> <span class="type">テキスト (短文)</span> </div>
-                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                                <div class="field-item-actions">
+                                    <a href="#" class="admin-icon-link" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                    <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                                </div>
+                            </li>
                             <li class="field-item">
-                                <span class="handle">☰</span>
+                                <span class="handle"><span class="material-icons-outlined">drag_indicator</span></span>
                                 <div class="field-item-label"> <span class="name">制作時期</span> <span class="type">テキスト (短文)</span> </div>
-                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                                <div class="field-item-actions">
+                                    <a href="#" class="admin-icon-link" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                    <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                                </div>
+                            </li>
                             <li class="field-item">
-                                <span class="handle">☰</span>
+                                <span class="handle"><span class="material-icons-outlined">drag_indicator</span></span>
                                 <div class="field-item-label"> <span class="name">キービジュアル画像</span> <span class="type">画像 (単一)</span> </div>
-                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                                <div class="field-item-actions">
+                                    <a href="#" class="admin-icon-link" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                    <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                                </div>
+                            </li>
                             <li class="field-item">
-                                <span class="handle">☰</span>
+                                <span class="handle"><span class="material-icons-outlined">drag_indicator</span></span>
                                 <div class="field-item-label"> <span class="name">ギャラリー画像</span> <span class="type">画像 (ギャラリー)</span> </div>
-                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                                <div class="field-item-actions">
+                                    <a href="#" class="admin-icon-link" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                    <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                                </div>
+                            </li>
                             <li class="field-item">
-                                <span class="handle">☰</span>
+                                <span class="handle"><span class="material-icons-outlined">drag_indicator</span></span>
                                 <div class="field-item-label"> <span class="name">使用モデル</span> <span class="type">リレーション (モデル)</span> </div>
-                                <div class="field-item-actions"> <a href="#">編集</a> | <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </div> </li>
+                                <div class="field-item-actions">
+                                    <a href="#" class="admin-icon-link" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                    <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                                </div>
+                            </li>
                         </ul>
                     </div>
-                    <div class="admin-section-footer">
-                        <a href="#" class="admin-button admin-button-secondary admin-nav-link" data-target="types-list-page">キャンセル</a>
-                        <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="types-list-page">保存する</a>
-                    </div>
                 </section>
+
+                <div class="page-actions">
+                    <a href="#" class="admin-button admin-button-secondary admin-nav-link" data-target="types-list-page"><span class="material-icons-outlined">cancel</span>キャンセル</a>
+                    <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="types-list-page"><span class="material-icons-outlined">save</span>保存する</a>
+                </div>
             </div>
 
             <div id="content-list-page" class="admin-page-content">
                 <div class="page-header">
                     <h3 id="content-list-title">（ここにタイプ名が入る）</h3>
-                    <a href="#" id="content-list-new-button" class="admin-button admin-button-primary admin-nav-link" data-target="content-entry-page" data-entry-name="新規作成" data-type-id="" data-type-name="">新規作成</a>
+                    <a href="#" id="content-list-new-button" class="admin-button admin-button-primary admin-nav-link" data-target="content-entry-page" data-entry-name="新規作成" data-type-id="" data-type-name=""><span class="material-icons-outlined">add</span>新規作成</a>
                 </div>
                 
                 <table id="content-list-table-artworks" class="content-list-table" style="display: none;">
-                    <thead> <tr> <th>作品タイトル</th> <th>制作時期</th> <th>操作</th> </tr> </thead>
+                    <thead> <tr> <th>名称</th> <th>時期 (作成日 - 更新日)</th> <th>操作</th> </tr> </thead>
                     <tbody>
                         <tr>
-                            <td>作品タイトル 1</td> <td>2024年</td>
-                            <td>
-                                <a href="#" class="admin-nav-link" data-target="content-entry-page" data-entry-name="作品タイトル 1" data-type-id="artworks" data-type-name="作品">編集</a> | 
-                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                            <td>作品タイトル 1</td>
+                            <td>2024年01月01日</td>
+                            <td class="actions">
+                                <a href="#" class="admin-icon-link admin-nav-link" data-target="content-entry-page" data-entry-name="作品タイトル 1" data-type-id="artworks" data-type-name="作品" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                            </td>
                         </tr>
                         <tr>
-                            <td>作品タイトル 2</td> <td>2025年</td>
-                            <td>
-                                <a href="#" class="admin-nav-link" data-target="content-entry-page" data-entry-name="作品タイトル 2" data-type-id="artworks" data-type-name="作品">編集</a> | 
-                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                            <td>作品タイトル 2</td>
+                            <td>2023年05月10日 - 2024年02月05日</td>
+                            <td class="actions">
+                                <a href="#" class="admin-icon-link admin-nav-link" data-target="content-entry-page" data-entry-name="作品タイトル 2" data-type-id="artworks" data-type-name="作品" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
                 
                 <table id="content-list-table-models" class="content-list-table" style="display: none;">
-                    <thead> <tr> <th>氏名</th> <th>ふりがな</th> <th>操作</th> </tr> </thead>
+                    <thead> <tr> <th>名称</th> <th>時期 (作成日 - 更新日)</th> <th>操作</th> </tr> </thead>
                     <tbody>
                         <tr>
-                            <td>モデル名 1</td> <td>もでるめい 1</td>
-                            <td>
-                                <a href="#" class="admin-nav-link" data-target="content-entry-page" data-entry-name="モデル名 1" data-type-id="models" data-type-name="モデル">編集</a> | 
-                                <a href="#" style="color: var(--admin-color-link-danger);">削除</a> </td>
+                            <td>モデル名 1</td>
+                            <td>2023年11月15日</td>
+                            <td class="actions">
+                                <a href="#" class="admin-icon-link admin-nav-link" data-target="content-entry-page" data-entry-name="モデル名 1" data-type-id="models" data-type-name="モデル" title="編集"><span class="material-icons-outlined">edit</span></a>
+                                <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            
             <div id="content-entry-page" class="admin-page-content">
                 
                 <div id="content-entry-form-container">
@@ -479,9 +847,19 @@
                         <h3>キービジュアル画像</h3>
                         <div class="admin-section-content">
                              <div class="form-group">
-                                <label for="entry-field-kv">画像アップロード</label>
-                                <input type="file" id="entry-field-kv" class="form-control">
-                                <img src="images/artworks/matsurika/matsurika_001.jpg" alt="プレビュー" style="max-width: 200px; margin-top: 1em;">
+                                <div class="file-input-advanced">
+                                    <div class="file-input-preview" style="width: 120px; height: 120px;">
+                                        <img src="images/artworks/matsurika/matsurika_001.jpg" alt="プレビュー">
+                                    </div>
+                                    <div class="file-input-actions">
+                                        <div class="form-inline">
+                                            <a href="#" class="admin-button admin-button-secondary admin-button-sm"><span class="material-icons-outlined">folder_open</span>ストレージから選択</a>
+                                            <label style="margin-left: 0.5em; margin-right: 0.5em;">または</label>
+                                            <input type="file" id="entry-field-kv-upload" class="form-control" style="width: auto;">
+                                        </div>
+                                        <a href="#" class="admin-icon-link danger" title="削除"><span class="material-icons-outlined">delete</span></a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -491,7 +869,10 @@
                         <div class="admin-section-content">
                             <div class="gallery-uploader">
                                 <p>画像をドラッグ＆ドロップ、または</p>
-                                <input type="file" multiple>
+                                <div class="form-inline" style="justify-content: center; gap: 1em; margin-top: 1em;">
+                                    <input type="file" multiple class="form-control" style="width: auto;">
+                                    <a href="#" class="admin-button admin-button-secondary"><span class="material-icons-outlined">folder_open</span>ストレージから追加</a>
+                                </div>
                             </div>
                             <div class="gallery-previews">
                                 <img src="images/artworks/matsurika/matsurika_001.jpg" alt="サンプル 1">
@@ -513,9 +894,9 @@
                         </div>
                     </section>
                     
-                    <div class="admin-section-footer" style="background: transparent; border: none; padding-right: 0;">
-                        <a href="#" class="admin-button admin-button-secondary admin-nav-link" data-target="content-list-page" data-type-id="artworks" data-type-name="作品">キャンセル</a>
-                        <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="content-list-page" data-type-id="artworks" data-type-name="作品">保存する</a>
+                    <div class="page-actions">
+                        <a href="#" class="admin-button admin-button-secondary admin-nav-link" data-target="content-list-page" data-type-id="artworks" data-type-name="作品"><span class="material-icons-outlined">cancel</span>キャンセル</a>
+                        <a href="#" class="admin-button admin-button-primary admin-nav-link" data-target="content-list-page" data-type-id="artworks" data-type-name="作品"><span class="material-icons-outlined">save</span>保存する</a>
                     </div>
                 </div>
 
@@ -566,20 +947,31 @@
                     let isActive = false; // デフォルトは非アクティブ
 
                     if (linkTarget === 'settings-page') {
-                        // --- 1.「サイト設定」リンク ---
-                        // 遷移先が「サイト設定」ならアクティブ
+                        // --- 1.「基本設定」リンク ---
                         isActive = (targetId === 'settings-page');
 
                     } else if (linkTarget === 'types-list-page') {
-                        // --- 2.「コンテンツタイプ」リンク ---
-                        // 遷移先が「タイプ一覧」または「タイプ編集」ならアクティブ
+                        // --- 2.「コンテンツ」リンク ---
                         isActive = (targetId === 'types-list-page' || targetId === 'types-edit-page');
 
+                    } else if (linkTarget === 'home-settings-page') {
+                        // --- 3.「ホーム画面」リンク ---
+                        isActive = (targetId === 'home-settings-page');
+
+                    } else if (linkTarget === 'navigation-page') {
+                        // --- 4.「ナビゲーション」リンク ---
+                        isActive = (targetId === 'navigation-page');
+
+                    } else if (linkTarget === 'storage-page') {
+                        // --- 5.「ストレージ」リンク ---
+                        isActive = (targetId === 'storage-page');
+                        
+                    } else if (linkTarget === 'account-page') {
+                        // --- 6.「ユーザーアカウント」リンク ---
+                        isActive = (targetId === 'account-page');
+
                     } else if (linkTarget === 'content-list-page') {
-                        // --- 3.「作品」や「モデル」などのコンテンツリンク ---
-                        // 遷移先が「エントリー一覧」または「エントリー編集」
-                        // *かつ*
-                        // リンクのタイプIDと現在のタイプIDが一致するならアクティブ
+                        // --- 7.「作品」や「モデル」などのコンテンツリンク ---
                         isActive = (targetId === 'content-list-page' || targetId === 'content-entry-page') 
                                      && (linkTypeId === typeId);
                     }
@@ -597,7 +989,7 @@
                 const entryName = target.dataset.entryName || '...';
                 let title = target.textContent; // デフォルト
 
-                if (targetId === 'settings-page' || targetId === 'types-list-page') {
+                if (targetId === 'settings-page' || targetId === 'types-list-page' || targetId === 'home-settings-page' || targetId === 'navigation-page' || targetId === 'storage-page' || targetId === 'account-page') {
                     title = target.textContent;
                 } 
                 else if (targetId === 'types-edit-page') {
@@ -648,10 +1040,13 @@
                     entryFormTitle.textContent = `${typeName}: ${entryName}を編集`;
                 }
                 
-                entryFormContainer.querySelectorAll('.admin-nav-link').forEach(link => {
-                     link.dataset.typeId = typeId;
-                     link.dataset.typeName = typeName;
-                });
+                const actionsContainer = entryFormContainer.querySelector('.page-actions');
+                if (actionsContainer) {
+                    actionsContainer.querySelectorAll('.admin-nav-link').forEach(link => {
+                        link.dataset.typeId = typeId;
+                        link.dataset.typeName = typeName;
+                    });
+                }
             }
 
 
@@ -662,7 +1057,7 @@
                 // クリックされた要素、またはその親が .admin-nav-link かどうかを探す
                 const targetLink = e.target.closest('.admin-nav-link');
                 
-                if (!targetLink) { // .admin-nav-link 以外は無視
+                if (!targetLink) { // .admin-nav-link D以外は無視
                     return;
                 }
                 
@@ -691,10 +1086,7 @@
                 else if (targetId === 'content-entry-page') {
                     setupContentEntryPage(typeId, typeName, entryName);
                 } 
-                else if (targetId === 'settings-page' || targetId === 'types-list-page' || targetId === 'types-edit-page') {
-                     // 編集ページから一覧に戻る際、typeIdが残っていると
-                     // updateSidebarActiveState が誤動作するため、
-                     // コンテンツ系以外のページに遷移するときは null にリセットする
+                else if (targetId === 'settings-page' || targetId === 'types-list-page' || targetId === 'types-edit-page' || targetId === 'home-settings-page' || targetId === 'navigation-page' || targetId === 'storage-page' || targetId === 'account-page') {
                      if (targetId !== 'types-edit-page') {
                         currentTypeId = null; 
                      }
@@ -707,7 +1099,7 @@
             });
 
             // --- 初期表示 ---
-            // 最初に表示すべきリンク（.active を持つ "サイト設定"）を探してクリックする
+            // 最初に表示すべきリンク（.active を持つ "基本設定"）を探してクリックする
             const initialLink = document.querySelector('.admin-sidebar .admin-nav-link.active');
             if (initialLink) {
                 initialLink.click();
